@@ -99,6 +99,9 @@ p    q
 ```
 
 ---
+<img width="200" height="200" alt="image" src="https://github.com/user-attachments/assets/97003992-6a5f-49e2-99b1-f26bb5ed47a7" />
+
+---
 
 ## Visualización
 
