@@ -8,14 +8,14 @@
 
 Un analizador léxico toma una cadena de entrada (como una expresión lógica) y la divide en componentes más pequeños llamados **tokens**, que pueden ser:
 
-- Variables (`p`, `q`, `r`, etc.)
-- Operadores (`~`, `^`, `o`, `=>`, `<=>`)
-- Paréntesis `(` y `)`
-- Constantes (`0`, `1`)
+* Variables (`p`, `q`, `r`, etc.)
+* Operadores (`~`, `^`, `o`, `=>`, `<=>`)
+* Paréntesis `(` y `)`
+* Constantes (`0`, `1`)
 
- **Ejemplo:**
+**Ejemplo:**
 
-Entrada: `(p=>q)^p`  
+Entrada: `(p=>q)^p`
 Salida del lexer: `(`, `p`, `=>`, `q`, `)`, `^`, `p`
 
 ---
@@ -28,7 +28,7 @@ Toma los tokens generados por LEX y determina si forman una **estructura válida
 
 Además, YACC permite construir un **árbol de análisis sintáctico** (AST), lo cual es útil para interpretar o transformar el contenido de una expresión.
 
-En otras palabras:  
+En otras palabras:
 YACC valida la **forma** de la expresión. Se asegura de que los operadores tengan los operandos correctos, los paréntesis estén bien colocados, y que la estructura de la fórmula cumpla con las reglas del lenguaje.
 
 ---
@@ -37,7 +37,7 @@ YACC valida la **forma** de la expresión. Se asegura de que los operadores teng
 
 En este proyecto decidimos utilizar el lenguaje **Go**, que no tiene una herramienta integrada como LEX o YACC. En su lugar, implementamos **nuestro propio analizador léxico (lexer) y sintáctico (parser)** de forma manual, usando estructuras y funciones personalizadas.
 
->  Esta implementación fue fuertemente influenciada por un proyecto previo desarrollado en el curso de **Estructura de Datos**, donde tuvimos que construir un **intérprete para el lenguaje LISP en Java**. En ese proyecto aprendimos a implementar desde cero un **tokenizador y un lexer**, clasificando símbolos y estructuras según el tipo de expresión. Esa experiencia fue la base conceptual para replicar un flujo similar en Go, pero orientado al reconocimiento de fórmulas del sistema lógico **L**.
+> Esta implementación fue fuertemente influenciada por un proyecto previo desarrollado en el curso de **Estructura de Datos**, donde tuvimos que construir un **intérprete para el lenguaje LISP en Java**. En ese proyecto aprendimos a implementar desde cero un **tokenizador y un lexer**, clasificando símbolos y estructuras según el tipo de expresión. Esa experiencia fue la base conceptual para replicar un flujo similar en Go, pero orientado al reconocimiento de fórmulas del sistema lógico **L**.
 
 ---
 
@@ -45,9 +45,9 @@ En este proyecto decidimos utilizar el lenguaje **Go**, que no tiene una herrami
 
 Creamos una estructura llamada `Lexer` que recorre cada carácter de la cadena de entrada y lo clasifica en distintos tipos de tokens según el alfabeto permitido:
 
-- Letras `p` a `z` → **Variables proposicionales**
-- Números `0` y `1` → **Constantes lógicas** (`falso` y `verdadero`)
-- Símbolos como `~`, `^`, `o`, `=>`, `<=>`, `(` y `)` → **Operadores lógicos y signos**
+* Letras `p` a `z` → **Variables proposicionales**
+* Números `0` y `1` → **Constantes lógicas** (`falso` y `verdadero`)
+* Símbolos como `~`, `^`, `o`, `=>`, `<=>`, `(` y `)` → **Operadores lógicos y signos**
 
 Cada vez que el lexer reconoce un símbolo válido, lo devuelve como un **token** que será utilizado por el parser.
 
@@ -57,9 +57,9 @@ Cada vez que el lexer reconoce un símbolo válido, lo devuelve como un **token*
 
 Creamos otra estructura llamada `Parser` que implementa las **reglas gramaticales** descritas por el sistema lógico **L**. Estas reglas se aplican a los tokens recibidos por el lexer:
 
-- `expr()` reconoce expresiones de tipo **implicación (`=>`)** y **doble implicación (`<=>`)**
-- `term()` reconoce **conjunciones (`^`)** y **disyunciones (`o`)**
-- `factor()` reconoce **negaciones (`~`)**, **expresiones entre paréntesis**, **variables** y **constantes**
+* `expr()` reconoce expresiones de tipo **implicación (`=>`)** y **doble implicación (`<=>`)**
+* `term()` reconoce **conjunciones (`^`)** y **disyunciones (`o`)**
+* `factor()` reconoce **negaciones (`~`)**, **expresiones entre paréntesis**, **variables** y **constantes**
 
 Cada una de estas funciones construye nodos de un **árbol sintáctico abstracto (AST)**, simulando el comportamiento de un parser generado automáticamente por YACC, pero implementado manualmente.
 
@@ -67,20 +67,53 @@ El **lexer** recorre carácter por carácter la cadena de entrada y clasifica lo
 
 ---
 
-##  ¿Por qué lo hicimos así?
+## Gramática usada (Sistema L)
 
-Go no incluye herramientas automáticas como **LEX/YACC** que sí existen en otros lenguajes como C o Python (por ejemplo, el paquete `PLY`). Por ello, decidimos implementar nuestra propia versión para comprender a profundidad cómo funcionan estos procesos internamente.
+Las reglas implementadas siguen la gramática del sistema L:
 
-Gracias a esta decisión:
+* Las variables proposicionales y constantes del alfabeto de L son fórmulas bien formadas.
+* Si A es una fórmula bien formada, entonces `~A` también lo es.
+* Si A y B son fórmulas bien formadas, entonces `A^B`, `AoB`, `A=>B`, `A<=>B` también lo son.
+* Si A es una fórmula bien formada, entonces `(A)` también lo es.
 
-- ✅ **Separar** el análisis léxico del análisis sintáctico fue más claro y controlado.
-- ✅ Pudimos diseñar un **AST (árbol de sintaxis abstracta)** para representar las expresiones.
-- ✅ Pudimos integrar la generación de un **grafo dirigido** visualizable con herramientas como **Graphviz**.
+Esto se representa en el código con funciones anidadas:
+
+* `factor()` = reconoce `~`, `VAR`, `CONST`, `(` `expr` `)`
+* `term()` = reconoce operadores binarios de menor precedencia: `^`, `o`
+* `expr()` = reconoce operadores binarios de mayor precedencia: `=>`, `<=>`
 
 ---
 
-## Conclusión
+## Generación del AST (Grafo dirigido)
 
-Aunque no usamos herramientas automáticas como LEX y YACC, logramos **replicar su funcionalidad desde cero en Go**. Implementamos un lexer capaz de reconocer tokens válidos del sistema **L** y un parser que valida expresiones según su estructura gramatical.
+El AST se genera con la función `generateDOT()` en el archivo `main.go`, que recorre el árbol generado por el parser y genera un archivo `.dot` para visualizarlo con Graphviz.
 
-Este proyecto no solo reforzó nuestro conocimiento sobre **autómatas y gramáticas**, sino que también nos permitió aplicar y consolidar aprendizajes de cursos anteriores como **Estructura de Datos**, conectando ideas de **interpretación de lenguajes** con los fundamentos teóricos de la **lógica matemática**.
+Ejemplo para la fórmula `(p=>q)^p`:
+
+```
+    ^
+   / \
+ =>   p
+/  \
+p    q
+```
+
+---
+
+## Visualización
+
+El archivo generado `output.dot` puede abrirse con [Graphviz](https://graphviz.org/) para visualizar el árbol sintáctico. Usa el siguiente comando para obtener la imagen:
+
+```bash
+dot -Tpng output.dot -o arbol.png
+```
+
+---
+
+## Bibliografía
+
+* Aho, A. V., Lam, M. S., Sethi, R., & Ullman, J. D. (2006). *Compilers: Principles, Techniques, and Tools*. Pearson Education.
+* [Documentación oficial de Graphviz](https://graphviz.org/)
+* [PLY (Python Lex-Yacc)](https://www.dabeaz.com/ply/)
+* [Go Programming Language Specification](https://golang.org/ref/spec)
+* Ejemplo y adaptación basada en proyectos previos del curso de Estructura de Datos (2024).
