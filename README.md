@@ -28,7 +28,7 @@ Toma los tokens generados por LEX y determina si forman una **estructura válida
 
 Además, YACC permite construir un **árbol de análisis sintáctico** (AST), lo cual es útil para interpretar o transformar el contenido de una expresión.
 
-💬 En otras palabras:  
+En otras palabras:  
 YACC valida la **forma** de la expresión. Se asegura de que los operadores tengan los operandos correctos, los paréntesis estén bien colocados, y que la estructura de la fórmula cumpla con las reglas del lenguaje.
 
 ---
