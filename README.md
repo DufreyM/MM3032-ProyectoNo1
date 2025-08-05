@@ -1,4 +1,4 @@
-#  Investigación: LEX, YACC y su Equivalente en Go
+# Investigación: LEX, YACC y su Equivalente en Go
 
 ---
 
@@ -63,9 +63,11 @@ Creamos otra estructura llamada `Parser` que implementa las **reglas gramaticale
 
 Cada una de estas funciones construye nodos de un **árbol sintáctico abstracto (AST)**, simulando el comportamiento de un parser generado automáticamente por YACC, pero implementado manualmente.
 
+El **lexer** recorre carácter por carácter la cadena de entrada y clasifica los elementos según el alfabeto del sistema lógico L (variables, operadores, constantes y signos de puntuación), mientras que el **parser** utiliza un enfoque **descendente recursivo** para validar que la estructura cumpla con la gramática especificada, construyendo un **AST (árbol sintáctico abstracto)** que refleja jerárquicamente la fórmula.
+
 ---
 
-###  ¿Por qué lo hicimos así?
+##  ¿Por qué lo hicimos así?
 
 Go no incluye herramientas automáticas como **LEX/YACC** que sí existen en otros lenguajes como C o Python (por ejemplo, el paquete `PLY`). Por ello, decidimos implementar nuestra propia versión para comprender a profundidad cómo funcionan estos procesos internamente.
 
